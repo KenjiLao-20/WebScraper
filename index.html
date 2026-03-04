@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameScraper — Extract Game Data from Any Website</title>
+    <title>Square Enix Game Scraper — Extract Game Data from Square Enix Websites</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -17,8 +17,8 @@
         <div class="header-glow"></div>
         <div class="header-content">
             <span class="header-eyebrow">// v2.0 — Educational Tool</span>
-            <h1>GAME<span class="accent-word">SCRAPER</span></h1>
-            <p>Extract structured game data from any gaming website — IGN, GameSpot, Square Enix, and beyond.</p>
+            <h1>SQUARE ENIX<span class="accent-word">SCRAPER</span></h1>
+            <p>Extract structured game data from Square Enix websites — game pages, news articles, and official Square Enix content.</p>
         </div>
     </header>
 
@@ -26,8 +26,8 @@
     <main>
         <section class="input-section">
             <div class="container">
-                <h2>ENTER TARGET URL</h2>
-                <p class="instruction">Paste the URL of any gaming website to begin extraction</p>
+                <h2>ENTER SQUARE ENIX URL</h2>
+                <p class="instruction">Paste any Square Enix website URL to extract game information</p>
 
                 <div id="errorMessage" class="error-message" style="display:none;"></div>
                 <div id="successMessage" class="success-message" style="display:none;"></div>
@@ -37,7 +37,7 @@
                         <input
                             type="url"
                             id="urlInput"
-                            placeholder="https://www.jp.square-enix.com/game/..."
+                            placeholder="https://www.jp.square-enix.com/ffvii_rebirth/"
                             autocomplete="off"
                             spellcheck="false"
                         >
@@ -46,17 +46,17 @@
                             <span class="loading-spinner" style="display:none;"></span>
                         </button>
                     </div>
-                    <p class="url-hint">↳ Add any gaming URL and hit Extract Data, or pick a preset below</p>
+                    <p class="url-hint">↳ Enter any Square Enix URL and hit Extract Data, or pick a preset below</p>
                 </div>
 
                 <div class="url-suggestions">
-                    <p>PRESET TARGETS</p>
+                    <p>SQUARE ENIX PRESETS</p>
                     <div class="suggestion-buttons">
                         <button class="suggestion-btn" data-url="https://www.jp.square-enix.com/ffvii_rebirth/">
-                            ⬡ Square Enix — FFVII Rebirth
+                            ⬡ Square Enix Japan — FFVII Rebirth
                         </button>
                         <button class="suggestion-btn" data-url="https://www.square-enix-games.com/en_EU/home">
-                            ⬡ Square Enix — EU Home
+                            ⬡ Square Enix — EU Homepage
                         </button>
                         <button class="suggestion-btn" data-url="https://www.square-enix-games.com/en_EU/news/final-fantasy-game-should-play-first">
                             ⬡ Square Enix — FF Article
@@ -74,7 +74,7 @@
             <div class="container">
                 <div class="results-header">
                     <h2>
-                        RESULTS
+                        EXTRACTED GAMES
                         <span id="scrapedUrl"></span>
                     </h2>
                     <div class="results-controls">
@@ -90,7 +90,7 @@
                 </div>
 
                 <div id="stats" class="stats-bar">
-                    <span id="gameCount">0</span>&nbsp;games extracted
+                    <span id="gameCount">0</span>&nbsp;games found on Square Enix website
                 </div>
 
                 <div id="gamesGrid" class="games-grid"></div>
@@ -101,15 +101,15 @@
         <section id="noResultsSection" class="no-results-section" style="display:none;">
             <div class="container">
                 <div class="no-results">
-                    <h3>NO DATA FOUND</h3>
-                    <p>This website couldn't be scraped — it may be blocking automated access or doesn't contain game data.</p>
-                    <p>Things to try:</p>
+                    <h3>NO GAME DATA FOUND</h3>
+                    <p>This Square Enix website couldn't be scraped — it may be blocking automated access or doesn't contain game information.</p>
+                    <p>Try these Square Enix pages instead:</p>
                     <ul>
-                        <li>A specific game product page (not a homepage)</li>
-                        <li>A Square Enix game page</li>
-                        <li>IGN, GameSpot, or Metacritic game listings</li>
+                        <li>A specific game product page (e.g., FFVII Rebirth page)</li>
+                        <li>Square Enix news articles about games</li>
+                        <li>Square Enix game listing pages</li>
                     </ul>
-                    <button id="tryAgainBtn" class="btn-primary" style="margin-top:1.5rem;">TRY ANOTHER URL</button>
+                    <button id="tryAgainBtn" class="btn-primary" style="margin-top:1.5rem;">TRY ANOTHER SQUARE ENIX URL</button>
                 </div>
             </div>
         </section>
@@ -118,17 +118,17 @@
     <!-- FOOTER -->
     <footer>
         <div class="footer-content">
-            <p>© 2024 GAMESCRAPER — Educational Project</p>
-            <p class="disclaimer">This tool scrapes publicly available information. Please respect each website's robots.txt and terms of service.</p>
+            <p>© 2024 SQUARE ENIX SCRAPER — Educational Project</p>
+            <p class="disclaimer">This tool scrapes publicly available information from Square Enix websites. Please respect robots.txt and terms of service.</p>
         </div>
     </footer>
 
     <!-- LOADING OVERLAY -->
     <div id="loadingOverlay" class="loading-overlay" style="display:none;">
         <div class="loading-ring"></div>
-        <h3>EXTRACTING DATA</h3>
-        <p id="loadingMessage">Accessing website and parsing game information...</p>
-        <p class="loading-note">This may take a few moments depending on the target</p>
+        <h3>EXTRACTING SQUARE ENIX DATA</h3>
+        <p id="loadingMessage">Accessing Square Enix website and parsing game information...</p>
+        <p class="loading-note">This may take a few moments depending on the page</p>
     </div>
 
     <script src="scraper.js"></script>
