@@ -1,13 +1,13 @@
-Square Enix Game Scraper 
-A web-based tool that extracts game information from Square Enix websites. Enter any Square Enix URL to scrape game titles, release dates, platforms, developers, publishers, and key features.
-
-Features
-URL Scraping: Extract data from any Square Enix website
-Preset Targets: Quick access to official Square Enix pages
-Smart Extraction: Automatically detects game information from pages
-Search & Filter: Find games within scraped results
-Export Data: Download results as JSON or CSV
-
-Responsive Design: Works on desktop and mobile
-Live Demo
+Square Enix Game Scraper <br>
+A web-based tool that extracts game information from Square Enix websites. Enter any Square Enix URL to scrape game titles, release dates, platforms, developers, publishers, and key features.<br>
+<br>
+Features<br>
+URL Scraping: Extract data from any Square Enix website<br>
+Preset Targets: Quick access to official Square Enix pages<br>
+Smart Extraction: Automatically detects game information from pages<br>
+Search & Filter: Find games within scraped results<br>
+Export Data: Download results as JSON or CSV<br>
+<br>
+Responsive Design: Works on desktop and mobile<br>
+Live Demo<br>
 (https://kenjilao-20.github.io/WebScraper/)
