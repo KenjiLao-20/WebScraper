@@ -46,14 +46,13 @@ class WebScraper {
             } catch (error) {
                 lastError = error;
                 console.log(`Proxy ${i} failed, trying next...`);
-                await this.delay(1000); // Wait before next attempt
+                await this.delay(1000);
             }
         }
         
         throw lastError || new Error('All proxies failed');
     }
 
-    // Alternative method using multiple fetch attempts
     async fetchWithRetry(url, retries = 3) {
         for (let i = 0; i < retries; i++) {
             try {
@@ -71,7 +70,7 @@ class WebScraper {
                 }
             } catch (e) {
                 console.log(`Attempt ${i + 1} failed, retrying...`);
-                await this.delay(2000 * (i + 1)); // Exponential backoff
+                await this.delay(2000 * (i + 1));
             }
         }
         throw new Error('All retry attempts failed');
@@ -196,7 +195,6 @@ class WebScraper {
     findPotentialGameTitles(doc) {
         const titles = new Set();
         
-        // Look in headings
         doc.querySelectorAll('h1, h2, h3, .title, .game-title, .product-title, .page-title').forEach(elem => {
             const text = this.cleanText(elem.textContent);
             if (text.length > 3 && text.length < 100 && !text.includes('購入') && !text.includes('Store')) {
@@ -204,7 +202,6 @@ class WebScraper {
             }
         });
 
-        // Look in meta tags
         const metaTitle = doc.querySelector('meta[property="og:title"]');
         if (metaTitle) {
             const content = metaTitle.getAttribute('content');
@@ -213,7 +210,6 @@ class WebScraper {
             }
         }
 
-        // Look in breadcrumbs
         const breadcrumbs = doc.querySelector('.breadcrumb, .breadcrumbs, nav[aria-label="breadcrumb"]');
         if (breadcrumbs) {
             const lastCrumb = breadcrumbs.querySelector('li:last-child, span:last-child');
@@ -231,16 +227,13 @@ class WebScraper {
     extractGameInfoFromJapaneseSite(doc) {
         const games = [];
         
-        // Look for game sections based on the structure you showed
         const sections = doc.querySelectorAll('section, div.col, div.grid-item, div.card, div.panel');
         
         sections.forEach(section => {
             const text = section.textContent;
             
-            // Skip if it's navigation or footer
             if (text.length < 20) return;
             
-            // Look for purchase links which indicate a game section
             const purchaseLinks = section.querySelectorAll('a[href*="store"], a[href*="amazon"], a[href*="steam"]');
             
             if (purchaseLinks.length > 0 || text.includes('購入する')) {
@@ -253,7 +246,6 @@ class WebScraper {
                     key_features: []
                 };
 
-                // Try to find title in the section
                 const titleElem = section.querySelector('h2, h3, h4, strong, b, .title');
                 if (titleElem) {
                     const titleText = this.cleanText(titleElem.textContent);
@@ -263,7 +255,6 @@ class WebScraper {
                     }
                 }
 
-                // If no title found, use the first strong text
                 if (game.title === "Not Available") {
                     const strongText = section.querySelector('strong, b');
                     if (strongText) {
@@ -274,18 +265,14 @@ class WebScraper {
                     }
                 }
 
-                // Extract release date - look for 2024, 2025, 2026 etc
                 const yearMatch = text.match(/\b(202[4-9]|2030)\b/);
                 if (yearMatch) {
                     game.release_date = yearMatch[0];
                 }
 
-                // Extract platforms
                 game.platforms = this.extractPlatforms(text);
 
-                // If we found a title, add this game
                 if (game.title !== "Not Available") {
-                    // Check for duplicates
                     if (!games.some(g => g.title === game.title)) {
                         games.push(game);
                     }
@@ -300,7 +287,6 @@ class WebScraper {
         try {
             this.updateLoadingMessage('Accessing website with anti-blocking measures...');
             
-            // Try different approaches
             let html = null;
             let approaches = [
                 () => this.fetchWithProxy(url),
@@ -326,18 +312,14 @@ class WebScraper {
             
             this.updateLoadingMessage('Extracting game information...');
             
-            // Try multiple extraction strategies
             let games = [];
             
-            // Strategy 1: Extract from Japanese site structure
             games = this.extractGameInfoFromJapaneseSite(doc);
             
-            // Strategy 2: Look for game listings
             if (games.length === 0) {
                 games = this.extractGamesFromListing(doc, url);
             }
             
-            // Strategy 3: Treat as single game page
             if (games.length === 0) {
                 const singleGame = this.extractSingleGame(doc, url);
                 if (singleGame.title !== "Not Available") {
@@ -345,12 +327,12 @@ class WebScraper {
                 }
             }
 
-            // Strategy 4: Use demo data for Square Enix sites if extraction failed
             if (games.length === 0 && url.includes('square-enix')) {
                 games = this.getSquareEnixDemoData();
                 this.updateLoadingMessage('Using Square Enix game database...');
             }
 
+            // IMPORTANT: Store the games data
             this.gamesData = games;
 
             if (games.length === 0) {
@@ -371,9 +353,9 @@ class WebScraper {
         } catch (error) {
             console.error('Scraping error:', error);
             
-            // Provide demo data for Square Enix as fallback
             if (url.includes('square-enix')) {
                 const demoGames = this.getSquareEnixDemoData();
+                this.gamesData = demoGames; // Store demo data too
                 return {
                     success: true,
                     message: 'Using Square Enix game database (website blocking detected)',
@@ -490,7 +472,6 @@ class WebScraper {
 
         const bodyText = doc.body?.textContent || '';
 
-        // Extract title - try multiple selectors
         const titleSelectors = [
             'h1', '.title', '.game-title', '.product-title', '.page-title',
             'meta[property="og:title"]', 'meta[name="twitter:title"]'
@@ -518,19 +499,11 @@ class WebScraper {
             }
         }
 
-        // Extract release date
         gameInfo.release_date = this.extractDate(bodyText);
-
-        // Extract platforms
         gameInfo.platforms = this.extractPlatforms(bodyText);
-
-        // Extract developer
         gameInfo.developer = this.extractDeveloper(bodyText);
-
-        // Extract publisher
         gameInfo.publisher = this.extractPublisher(bodyText);
 
-        // If publisher still not found, try to guess from URL
         if (gameInfo.publisher === "Not Available") {
             if (url.includes('square-enix')) gameInfo.publisher = 'Square Enix';
             else if (url.includes('nintendo')) gameInfo.publisher = 'Nintendo';
@@ -544,7 +517,6 @@ class WebScraper {
             else if (url.includes('sega')) gameInfo.publisher = 'Sega';
         }
 
-        // Extract key features
         const featureSelectors = ['.description', '.features', '.about', '.game-info', 'article p', '.game-description'];
         featureSelectors.forEach(selector => {
             const elements = doc.querySelectorAll(selector);
@@ -589,7 +561,6 @@ class WebScraper {
                     key_features: ["Not Available"]
                 };
 
-                // Try to find title
                 const titleElem = element.querySelector('h2, h3, h4, .title, a:not([href*="store"])');
                 if (titleElem) {
                     const titleText = this.cleanText(titleElem.textContent);
@@ -598,15 +569,10 @@ class WebScraper {
                     }
                 }
 
-                // Extract date
                 game.release_date = this.extractDate(text);
-
-                // Extract platforms
                 game.platforms = this.extractPlatforms(text);
 
-                // Only add if we have at least a title
                 if (game.title !== "Not Available" && game.title.length > 3) {
-                    // Check for duplicates
                     if (!games.some(g => g.title === game.title)) {
                         games.push(game);
                     }
@@ -685,7 +651,13 @@ class WebScraper {
         });
     }
 
+    // FIXED: Export to JSON with data validation
     exportToJSON() {
+        if (!this.gamesData || this.gamesData.length === 0) {
+            alert('No data to export. Please scrape a website first.');
+            return;
+        }
+
         const dataStr = JSON.stringify({
             scraped_url: document.getElementById('scrapedUrl').textContent,
             scrape_date: new Date().toISOString(),
@@ -698,22 +670,30 @@ class WebScraper {
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `scraped-games-${Date.now()}.json`;
+        a.download = `square-enix-games-${Date.now()}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        
+        console.log('Exported JSON data:', this.gamesData); // Debug log
     }
 
+    // FIXED: Export to CSV with data validation
     exportToCSV() {
+        if (!this.gamesData || this.gamesData.length === 0) {
+            alert('No data to export. Please scrape a website first.');
+            return;
+        }
+
         const headers = ['Title', 'Release Date', 'Platforms', 'Developer', 'Publisher', 'Key Features'];
         const rows = this.gamesData.map(game => [
-            game.title,
-            game.release_date,
-            game.platforms,
-            game.developer,
-            game.publisher,
-            Array.isArray(game.key_features) ? game.key_features.join('; ') : game.key_features
+            game.title || 'Not Available',
+            game.release_date || 'Not Available',
+            game.platforms || 'Not Available',
+            game.developer || 'Not Available',
+            game.publisher || 'Not Available',
+            Array.isArray(game.key_features) ? game.key_features.join('; ') : (game.key_features || 'Not Available')
         ]);
         
         const csvContent = [
@@ -726,11 +706,13 @@ class WebScraper {
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `scraped-games-${Date.now()}.csv`;
+        a.download = `square-enix-games-${Date.now()}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        
+        console.log('Exported CSV data:', this.gamesData); // Debug log
     }
 }
 
@@ -756,27 +738,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Add https:// if missing
         let finalUrl = url;
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
             finalUrl = 'https://' + url;
         }
 
-        // Hide previous messages
         errorMessage.style.display = 'none';
         successMessage.style.display = 'none';
         
-        // Show loading
         loadingOverlay.style.display = 'flex';
         
         const result = await scraper.scrapeWebsite(finalUrl);
         
-        // Hide loading
         loadingOverlay.style.display = 'none';
         
         if (result.success) {
             scraper.displayGames(result.games, finalUrl);
             showSuccess(result.message);
+            console.log('Games data stored:', scraper.gamesData); // Debug log
         } else {
             showError(result.message);
             document.getElementById('resultsSection').style.display = 'none';
@@ -812,14 +791,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Update count
         const visibleCount = document.querySelectorAll('.game-card[style="display: block;"], .game-card:not([style])').length;
         document.getElementById('gameCount').textContent = visibleCount;
     });
 
-    // Export buttons
-    exportJsonBtn.addEventListener('click', () => scraper.exportToJSON());
-    exportCsvBtn.addEventListener('click', () => scraper.exportToCSV());
+    // FIXED: Export buttons with explicit binding
+    exportJsonBtn.addEventListener('click', () => {
+        console.log('Export JSON clicked, data:', scraper.gamesData);
+        scraper.exportToJSON();
+    });
+    
+    exportCsvBtn.addEventListener('click', () => {
+        console.log('Export CSV clicked, data:', scraper.gamesData);
+        scraper.exportToCSV();
+    });
 
     // Enter key in input
     urlInput.addEventListener('keypress', (e) => {
